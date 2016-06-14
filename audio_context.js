@@ -1,25 +1,10 @@
-var context;
-var src = 'sample.mp3'
-
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
-context = new AudioContext();
+var context = new AudioContext();
+var reader = new FileReader;
 
-var getAudioBuffer = function(source, fn) {
-  var req = new XMLHttpRequest();
-  req.responseType = 'arraybuffer';
-
-  req.onreadystatechange = function() {
-    if (req.readyState === 4) {
-      if (req.status === 0 || req.status === 200) {
-        context.decodeAudioData(req.response, function(buffer) {
-          fn(buffer);
-        });
-      }
-    }
-  };
-  req.open('GET', source, true);
-  req.send('');
-};
+reader.onload = function () {
+  context.decodeAudioData(reader.result, function(buffer) { playSound(buffer) });
+}
 
 var playSound = function(buffer) {
   var source = context.createBufferSource();
@@ -28,11 +13,7 @@ var playSound = function(buffer) {
   source.start(0);
 };
 
-window.onload = function() {
-  getAudioBuffer(src, function(buffer) {
-    var btn = document.getElementById('btn');
-    btn.onclick = function() {
-      playSound(buffer);
-    };
-  });
-};
+window.onload = function () {
+  var f = document.getElementById('upload')
+  f.addEventListener('change', function(e) { reader.readAsArrayBuffer(e.target.files[0]) });
+}
